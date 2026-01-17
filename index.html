@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inhaler Greenhouse Gas (GHG) Comparison Tool</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#111a2e;
+      --muted:#9fb0d0;
+      --text:#e8eefc;
+      --accent:#6ea8fe;
+      --good:#44d19d;
+      --warn:#ffcc66;
+      --bad:#ff6b6b;
+      --border:#223154;
+    }
+
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: linear-gradient(180deg, #071022 0%, #0b1220 55%, #071022 100%);
+      color: var(--text);
+    }
+
+    header{
+      padding: 28px 16px 10px;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    h1{ margin:0 0 6px; font-size: 1.45rem; }
+    p{ margin: 0; color: var(--muted); line-height: 1.45; }
+
+    main{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .card{
+      background: rgba(17,26,46,0.9);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+
+    .controls{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: end;
+    }
+
+    label{
+      display:block;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    select, input[type="checkbox"]{
+      accent-color: var(--accent);
+    }
+
+    select{
+      width: min(520px, 100%);
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #0b1429;
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    .toggle{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #0b1429;
+      color: var(--text);
+      height: 44px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+      align-items: start;
+    }
+
+    .col-6{ grid-column: span 6; }
+    .col-12{ grid-column: span 12; }
+
+    @media (max-width: 720px){
+      .col-6{ grid-column: span 12; }
+    }
+
+    .metric{
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(11,20,41,0.8);
+    }
+
+    .metric .k{
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .metric .v{
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .badge{
+      display:inline-flex;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      border: 1px solid var(--border);
+      background: #0b1429;
+      color: var(--muted);
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    .impact-good{ color: var(--good); border-color: rgba(68,209,157,0.35); }
+    .impact-warn{ color: var(--warn); border-color: rgba(255,204,102,0.35); }
+    .impact-bad{  color: var(--bad);  border-color: rgba(255,107,107,0.35); }
+
+    ul{ margin: 10px 0 0; padding-left: 18px; color: var(--text); }
+    li{ margin: 6px 0; color: var(--text); }
+    .muted{ color: var(--muted); }
+
+    .small{
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .footer{
+      padding: 10px 16px 30px;
+      max-width: 980px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .pillrow{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .pill{
+      border: 1px solid var(--border);
+      background: #0b1429;
+      color: var(--text);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.85rem;
+    }
+
+    .pill strong{ color: var(--accent); }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Inhaler Greenhouse Gas (GHG) Comparison Tool</h1>
+    <p>
+      Select an inhaler to view estimated climate impact and lower-GHG alternatives.
+      Replace placeholder numbers with your preferred data sources.
+    </p>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="controls">
+        <div style="flex: 1 1 520px;">
+          <label for="inhalerSelect">Inhaler / Device</label>
+          <select id="inhalerSelect" aria-label="Select inhaler"></select>
+        </div>
+
+        <div class="toggle" style="flex: 0 0 auto;">
+          <input id="lowOnly" type="checkbox" />
+          <label for="lowOnly" style="margin:0;">Show lower-GHG options only</label>
+        </div>
+      </div>
+
+      <div class="small" style="margin-top:10px;">
+        Tip: You can structure this by brand, class (SABA/ICS/LABA/LAMA), or device (MDI/DPI/SMI/nebulizer).
+      </div>
+    </section>
+
+    <section class="card" id="detailsCard" hidden>
+      <div class="grid">
+        <div class="col-12">
+          <h2 id="title" style="margin:0 0 6px; font-size: 1.15rem;"></h2>
+          <div class="small muted" id="subtitle"></div>
+          <div class="pillrow" id="tags"></div>
+        </div>
+
+        <div class="col-6">
+          <div class="metric">
+            <div class="k">Estimated CO₂e per inhaler (lifecycle)</div>
+            <div class="v" id="co2ePerInhaler">—</div>
+          </div>
+        </div>
+
+        <div class="col-6">
+          <div class="metric">
+            <div class="k">Estimated CO₂e per dose</div>
+            <div class="v" id="co2ePerDose">—</div>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="metric">
+            <div class="k">Notes (assumptions, propellant, etc.)</div>
+            <div class="small" id="notes">—</div>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="metric">
+            <div class="k">Lower-GHG alternatives (similar therapeutic intent)</div>
+            <ul id="alternatives"></ul>
+            <div class="small muted" id="altFootnote" style="margin-top:8px;"></div>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="small">
+            <strong>Important:</strong> Clinical appropriateness comes first. Switching devices can affect
+            technique, inspiratory flow requirements, adherence, and outcomes. Consider shared decision-making,
+            training, and formulary access.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="small">
+        <strong>How to update data:</strong> In the script at the bottom, edit the <code>INHALERS</code> array.
+        Use consistent units (e.g., kg CO₂e per inhaler; g CO₂e per dose). Add citations in <code>sources</code>.
+      </div>
+    </section>
+  </main>
+
+  <div class="footer">
+    This tool is for informational use. Populate it with values from your chosen sources and institutional policies.
+  </div>
+
+  <script>
+    /**
+     * Replace PLACEHOLDER values with your preferred dataset.
+     * Recommended fields:
+     * - name, deviceType, class, propellant, dosesPerInhaler
+     * - co2ePerInhalerKg (kg CO2e per inhaler), co2ePerDoseG (g CO2e per dose)
+     * - impactBand: "low" | "medium" | "high" (used for badge color)
+     * - alternatives: array of { name, why, estComparison }
+     * - sources: array of short citations or URLs (optional)
+     */
+    const INHALERS = [
+      {
+        id: "albuterol_mdi_hfa_placeholder",
+        name: "Albuterol (SABA) — MDI (HFA) [placeholder]",
+        deviceType: "MDI",
+        drugClass: "SABA",
+        propellant: "HFA (placeholder)",
+        dosesPerInhaler: 200,
+        co2ePerInhalerKg: 0,     // TODO: replace
+        co2ePerDoseG: 0,         // TODO: replace
+        impactBand: "high",      // common pattern: MDIs often higher; keep/edit as needed
+        notes: "Placeholder entry. Replace CO₂e estimates and propellant details based on your selected source and local product list.",
+        alternatives: [
+          { name: "Albuterol — DPI (if available)", why: "No propellant; typically lower device-related emissions.", estComparison: "Often lower than MDI (fill with numbers)." },
+          { name: "SMI option (where applicable)", why: "Propellant-free mist device; may reduce GHG vs MDI.", estComparison: "Often lower than MDI (fill with numbers)." }
+        ],
+        sources: ["Add your citation(s) here"]
+      },
+      {
+        id: "ics_laba_dpi_placeholder",
+        name: "ICS/LABA — DPI [placeholder]",
+        deviceType: "DPI",
+        drugClass: "ICS/LABA",
+        propellant: "None",
+        dosesPerInhaler: 60,
+        co2ePerInhalerKg: 0,   // TODO
+        co2ePerDoseG: 0,       // TODO
+        impactBand: "low",
+        notes: "Dry powder inhalers (DPIs) are typically propellant-free; lifecycle emissions depend on manufacturing and distribution.",
+        alternatives: [
+          { name: "Other DPI within class", why: "Switch within DPI category to align with formulary/cost while maintaining lower GHG.", estComparison: "Comparable (fill with numbers)." }
+        ],
+        sources: ["Add your citation(s) here"]
+      },
+      {
+        id: "laba_lama_smi_placeholder",
+        name: "LAMA/LABA — SMI [placeholder]",
+        deviceType: "SMI",
+        drugClass: "LAMA/LABA",
+        propellant: "None",
+        dosesPerInhaler: 60,
+        co2ePerInhalerKg: 0,  // TODO
+        co2ePerDoseG: 0,      // TODO
+        impactBand: "low",
+        notes: "Soft mist inhalers (SMIs) are propellant-free; ensure patient can use device properly and has coverage.",
+        alternatives: [
+          { name: "DPI LAMA/LABA option", why: "Propellant-free alternative; consider inspiratory flow needs.", estComparison: "Comparable or lower (fill with numbers)." }
+        ],
+        sources: ["Add your citation(s) here"]
+      }
+    ];
+
+    const $ = (sel) => document.querySelector(sel);
+
+    function bandToBadge(band){
+      if (band === "low") return { text: "Lower GHG", cls: "impact-good" };
+      if (band === "medium") return { text: "Moderate GHG", cls: "impact-warn" };
+      return { text: "Higher GHG", cls: "impact-bad" };
+    }
+
+    function fmtKg(x){
+      if (x === null || x === undefined) return "—";
+      if (Number.isFinite(x) && x > 0) return `${x.toFixed(2)} kg CO₂e`;
+      if (Number.isFinite(x) && x === 0) return "0.00 kg CO₂e (placeholder)";
+      return "—";
+    }
+
+    function fmtG(x){
+      if (x === null || x === undefined) return "—";
+      if (Number.isFinite(x) && x > 0) return `${x.toFixed(1)} g CO₂e`;
+      if (Number.isFinite(x) && x === 0) return "0.0 g CO₂e (placeholder)";
+      return "—";
+    }
+
+    function renderOptions(){
+      const lowOnly = $("#lowOnly").checked;
+      const select = $("#inhalerSelect");
+      const current = select.value;
+
+      const options = INHALERS
+        .filter(x => !lowOnly || x.impactBand === "low")
+        .map(x => ({ id: x.id, label: x.name }));
+
+      select.innerHTML = "";
+      for (const opt of options){
+        const o = document.createElement("option");
+        o.value = opt.id;
+        o.textContent = opt.label;
+        select.appendChild(o);
+      }
+
+      // Preserve selection if possible
+      if (options.some(o => o.id === current)) {
+        select.value = current;
+      }
+    }
+
+    function renderDetails(id){
+      const inhaler = INHALERS.find(x => x.id === id);
+      if (!inhaler) {
+        $("#detailsCard").hidden = true;
+        return;
+      }
+
+      $("#detailsCard").hidden = false;
+
+      const badge = bandToBadge(inhaler.impactBand);
+      $("#title").innerHTML = `${inhaler.name} <span class="badge ${badge.cls}">${badge.text}</span>`;
+      $("#subtitle").textContent =
+        `${inhaler.deviceType} • ${inhaler.drugClass}` +
+        (inhaler.propellant ? ` • Propellant: ${inhaler.propellant}` : "") +
+        (inhaler.dosesPerInhaler ? ` • Doses: ${inhaler.dosesPerInhaler}` : "");
+
+      // Tags
+      const tags = $("#tags");
+      tags.innerHTML = "";
+      const tagItems = [
+        ["Device", inhaler.deviceType],
+        ["Class", inhaler.drugClass],
+        ["Propellant", inhaler.propellant || "—"]
+      ];
+      for (const [k,v] of tagItems){
+        const pill = document.createElement("div");
+        pill.className = "pill";
+        pill.innerHTML = `<strong>${k}:</strong> ${v}`;
+        tags.appendChild(pill);
+      }
+
+      $("#co2ePerInhaler").textContent = fmtKg(inhaler.co2ePerInhalerKg);
+      $("#co2ePerDose").textContent = fmtG(inhaler.co2ePerDoseG);
+      $("#notes").textContent = inhaler.notes || "—";
+
+      const ul = $("#alternatives");
+      ul.innerHTML = "";
+      (inhaler.alternatives || []).forEach(a => {
+        const li = document.createElement("li");
+        li.innerHTML =
+          `<strong>${a.name}</strong>` +
+          (a.why ? ` — <span class="muted">${a.why}</span>` : "") +
+          (a.estComparison ? `<div class="small muted">GHG comparison: ${a.estComparison}</div>` : "");
+        ul.appendChild(li);
+      });
+
+      const src = inhaler.sources && inhaler.sources.length
+        ? `Sources: ${inhaler.sources.join(" • ")}`
+        : "Sources: (add citations in the dataset)";
+      $("#altFootnote").textContent = src;
+    }
+
+    function init(){
+      renderOptions();
+      const select = $("#inhalerSelect");
+      if (select.options.length){
+        renderDetails(select.value);
+      }
+
+      $("#lowOnly").addEventListener("change", () => {
+        renderOptions();
+        const sel = $("#inhalerSelect");
+        if (sel.options.length){
+          renderDetails(sel.value);
+        } else {
+          $("#detailsCard").hidden = true;
+        }
+      });
+
+      $("#inhalerSelect").addEventListener("change", (e) => {
+        renderDetails(e.target.value);
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
